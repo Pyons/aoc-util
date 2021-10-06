@@ -5,7 +5,7 @@
 
 We want to be able to read the puzzle description, solve and submit it without leaving the repl.
 
-For this we have to be able to download the description and the puzzle input. This library offers some conveniences functions.
+For this we have to be able to download the description and the puzzle input. This library offers some convenience functions.
 
 ```clojure
 (get!) ;;=> returns the input as a vector of strings, parsing the current namespace to infer the puzzle day
@@ -16,7 +16,7 @@ For this we have to be able to download the description and the puzzle input. Th
 
 (submit! 1 0) ;;=> Submit Puzzle answer part 1 answer 0, for the current namespace
 
-(download-description) ;;=> Downloads the Puzzle description to ressources/puzzle/{YEAR}/{DAY}.md 
+(download-description) ;;=> Downloads the Puzzle description to resources/puzzle/{YEAR}/{DAY}.md 
 ```
 
 

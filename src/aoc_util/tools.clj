@@ -66,9 +66,10 @@
     (doto cm
       (.put (URI. url) {"Set-Cookie" [(str/join ";" cookie-list)]}))))
 
-(def Cookie-Manager
-  (delay (-> (CookieManager.)
-             (add-cookies host {"session" @read-session-key}))))
+(def ^:private Cookie-Manager
+  (delay 
+    (-> (CookieManager.)
+        (add-cookies host {"session" @read-session-key}))))
 
 (defn- download-puzzle
   "Puzzle id `year/day`"
