@@ -23,7 +23,7 @@
             [lambdaisland.regal :as regal]
             [tick.core :as t]))
 
-(def ^{:doc "Advent of Code Server"}
+(def ^{:doc "Advent of Code Server" :private true}
   host "https://adventofcode.com")
 
 (defn- older-than?
