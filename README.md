@@ -19,6 +19,10 @@ For this we have to be able to download the description and the puzzle input. Th
 (download-description) ;;=> Downloads the Puzzle description to resources/puzzle/{YEAR}/{DAY}.md 
 ```
 
+## Docs
+
+[https://pyons.github.io/aoc-util/](https://pyons.github.io/aoc-util/)
+
 
 ## Installation
 
