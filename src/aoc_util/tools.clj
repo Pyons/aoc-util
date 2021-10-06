@@ -13,7 +13,7 @@
   (:import [java.net CookieManager URI]
            [java.time ZonedDateTime Period]
            [io.github.furstenheim CopyDown])
-  (:require [aoc-util.util :refer [str->int]]
+  (:require [aoc-util.utils :refer [str->int]]
             [clojure.java.io :refer [resource reader file make-parents]]
             [clojure.string :as str]
             [hato.client :as hc]
@@ -94,11 +94,6 @@
      (println (format "input for: year %s day %s" year day))
      (with-open [rdr (reader (download-puzzle year day))]
        (mapv parser (line-seq rdr))))))
-
-(defn line-process
-  ([^String input] (line-process input identity))
-  ([^String input parser]
-   (mapv parser (line-seq (reader input)))))
 
 (defn submit!
   "Takes the namespace `{ns}.{year}.day{x}`, which part [1 2] and the answer"

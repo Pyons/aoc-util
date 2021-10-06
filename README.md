@@ -1,12 +1,32 @@
 # aoc-util
 
 
+## Rationale
+
+We want to be able to read the puzzle description, solve and submit it without leaving the repl.
+
+For this we have to be able to download the description and the puzzle input. This library offers some conveniences functions.
+
+```clojure
+(get!) ;;=> returns the input as a vector of strings, parsing the current namespace to infer the puzzle day
+
+(get! "2020.7") ;;=> returns the input as a vector of strings
+
+(get! "2020.7" str->int) ;;=> You can pass an optional function, defaults to the identity fn
+
+(submit! 1 0) ;;=> Submit Puzzle answer part 1 answer 0, for the current namespace
+
+(download-description) ;;=> Downloads the Puzzle description to ressources/puzzle/{YEAR}/{DAY}.md 
+```
+
+
 ## Installation
 
 deps.edn
 
 ```clojure
-:deps {pyons/aoc-util {:git/url "https://github.com/pyons/aoc-util" :git/tag "v0.0.2" :git/sha "177557c"}
+:deps
+    {pyons/aoc-util {:git/url "https://github.com/pyons/aoc-util" :git/tag "v0.0.2" :git/sha "177557c"}
 ```
 
 ## Examples
@@ -16,7 +36,6 @@ deps.edn
   (:require [aoc-util.util :refer [get! str->int download-description]]))
 
 (def input (get!)) ;; gets the input for the puzzle year 2020 day 1
-
 ```
 
 ## License

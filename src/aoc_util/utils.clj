@@ -1,6 +1,7 @@
 (ns aoc-util.utils
   "Helper functions"
-  (:require [clojure.edn :as edn]))
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :refer [reader]]))
 
 (def str->int
   (memoize
@@ -15,3 +16,7 @@
   [^String str]
   (map edn/read-string (re-seq #"\d+" str)))
 
+(defn line-process
+  ([^String input] (line-process input identity))
+  ([^String input parser]
+   (mapv parser (line-seq (reader input)))))

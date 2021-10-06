@@ -8,7 +8,12 @@
         io.github.furstenheim/copy_down {:mvn/version "1.0"}
         hickory/hickory {:mvn/version "0.7.1"}}
  :aliases
- {:run-m {:main-opts ["-m" "aoc-util.aoc-util"]}
+ {:codox {:extra-deps {codox/codox {:mvn/version "0.10.7"}}
+        :exec-fn codox.main/generate-docs
+        :exec-args {:source-paths  ["src"]
+                    :output-path "docs"}}
+
+  :run-m {:main-opts ["-m" "aoc-util.aoc-util"]}
   :run-x {:ns-default aoc-util.aoc-util
           :exec-fn greet
           :exec-args {:name "Clojure"}}
