@@ -1,5 +1,5 @@
-(ns aoc-util.util
-  "Utilities to make Advent of Code work with the repl
+(ns aoc-util.tools
+  "Tools to make Advent of Code work with the repl
   You can submit, retrieve and read the puzzle 
 
   By default it tries to infer the current puzzle to use, from the namespace e.g. se.2020.day2
@@ -13,11 +13,9 @@
   (:import [java.net CookieManager URI]
            [java.time ZonedDateTime Period]
            [io.github.furstenheim CopyDown])
-  (:require [clojure.edn :as edn]
+  (:require [aoc-util.util :refer [str->int]]
             [clojure.java.io :refer [resource reader file make-parents]]
             [clojure.string :as str]
-            [clojure.spec.alpha :as spec]
-            [clojure.spec.gen.alpha :as gen]
             [hato.client :as hc]
             [hickory.core :as hi]
             [hickory.render :as hr]
@@ -35,29 +33,18 @@
    (t/>> z p)
    (t/zoned-date-time)))
 
-(def str->int
-  (memoize
-   (fn [^String n]
-     (Integer/parseInt n))))
-
-(defn numbers-from-str
-  "Retrieves all numbers from a string
-  returns a list of numbers"
-  [^String str]
-  (map edn/read-string (re-seq #"\d+" str)))
-
 (defn parse-ns [ns]
   (let [number-cpt [:capture [:+ :digit]]
         r (regal/regex
-            [:cat :start
-             [:* [:cat [:+ :word] "."]]
-             [:capture [:+ :digit]]
-             "." 
-             [:alt
-              [:cat "day" number-cpt]
-              [:cat "d" number-cpt]
-              number-cpt]
-             :end])
+           [:cat :start
+            [:* [:cat [:+ :word] "."]]
+            [:capture [:+ :digit]]
+            "."
+            [:alt
+             [:cat "day" number-cpt]
+             [:cat "d" number-cpt]
+             number-cpt]
+            :end])
         [_ year d1? d2? d3?] (re-find r (str ns))]
     (mapv str->int [year (or d1? d2? d3?)])))
 
@@ -174,6 +161,4 @@
   (download-description "ns.2020.day2")
 
   ;; gets the input for the puzzle
-  (get! "ns.2020.day2" identity)
-  
-  )
+  (get! "ns.2020.day2" identity))
