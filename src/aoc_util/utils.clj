@@ -67,6 +67,8 @@
   (map edn/read-string (re-seq #"\d+" str)))
 
 (defn line-process
+  "Process a string line by line
+  takes a parser fn which is used with mapv, not lazy"
   ([^String input] (line-process input identity))
   ([^String input parser]
    (mapv parser (line-seq (reader input)))))
