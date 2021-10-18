@@ -1,4 +1,4 @@
-(ns aoc-util.tool-test
+(ns aoc-util.tools-test
   (:require [clojure.test :refer :all]
             [aoc-util.tools :refer :all]))
 

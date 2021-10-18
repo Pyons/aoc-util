@@ -1,7 +1,8 @@
 (ns aoc-util.utils
   "Helper functions"
+  (:import [java.io BufferedReader StringReader])
   (:require [clojure.edn :as edn]
-            [clojure.java.io :refer [reader]]
+            [clojure.java.io :refer [input-stream]]
             [hato.client :as hc]))
 
 (defmacro save
@@ -60,6 +61,9 @@
       (save
         (Integer/parseInt n)))))
 
+(defn str->int [s]
+  (save (Integer/parseInt s)))
+
 (defn numbers-from-str
   "Retrieves all numbers from a string
   returns a list of numbers"
@@ -71,4 +75,5 @@
   takes a parser fn which is used with mapv, not lazy"
   ([^String input] (line-process input identity))
   ([^String input parser]
-   (mapv parser (line-seq (reader input)))))
+   (when (string? input)
+     (mapv parser (line-seq (BufferedReader. (StringReader. input)))))))
