@@ -12,6 +12,7 @@
   Puzzle descriptions are stored `resources/puzzle/{YEAR}/{DAY}.md`"
   (:import [java.net CookieManager URI]
            [java.time ZonedDateTime Period]
+           [java.awt Desktop]
            [io.github.furstenheim CopyDown])
   (:require [aoc-util.utils :refer [str->int]]
             [clojure.java.io :refer [resource reader file make-parents]]
@@ -27,13 +28,13 @@
   host "https://adventofcode.com")
 
 (defn- older-than?
-  "Checks if a ZonedDateTime is older than Period"
+  "Checks if a `ZonedDateTime` z is older than `Period` p"
   [^ZonedDateTime z ^Period p]
   (t/<
    (t/>> z p)
    (t/zoned-date-time)))
 
-(defn parse-ns [ns]
+(defn- parse-ns [ns]
   (let [number-cpt [:capture [:+ :digit]]
         r (regal/regex
            [:cat :start
@@ -51,7 +52,7 @@
 (defn- last-modified [path]
   (-> path file .lastModified (t/new-duration :seconds) t/inst))
 
-(def read-session-key
+(def ^:private read-session-key
   (delay
    (if-let [path (resource "session-key.cookie")]
      (let [cookie (slurp path)
@@ -67,9 +68,9 @@
       (.put (URI. url) {"Set-Cookie" [(str/join ";" cookie-list)]}))))
 
 (def ^:private Cookie-Manager
-  (delay 
-    (-> (CookieManager.)
-        (add-cookies host {"session" @read-session-key}))))
+  (delay
+   (-> (CookieManager.)
+       (add-cookies host {"session" @read-session-key}))))
 
 (defn- download-puzzle
   "Puzzle id `year/day`"
@@ -152,9 +153,19 @@
      (spit doc-name md)
      (resource (format "puzzle/%s.%s" puzzle-id "md")))))
 
+(defn open
+  "Opens the problem with the default browser"
+  ([] (open *ns*))
+  ([ns]
+   (let [[year day] (parse-ns ns)
+         url (URI. (format "%s/%s/day/%s" host year day))]
+     (.browse (Desktop/getDesktop) url))))
+
 (comment
 
   (download-description "ns.2020.day2")
+
+  (open "ns.2020.day2")
 
   ;; gets the input for the puzzle
   (get! "ns.2020.day2" identity))

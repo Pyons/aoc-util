@@ -29,5 +29,7 @@
 
 (deftest numbers-of-string
   (are [x y] = 
+       (numbers-of-string nil) nil
        (numbers-from-str "") '()
+       (numbers-from-str "test12test21sfsd") '(12 21)
        (numbers-from-str "1 2") '(1 2)))
