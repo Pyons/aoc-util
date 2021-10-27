@@ -10,12 +10,23 @@
   Inputs are cached and reused they never change
 
   Puzzle descriptions are stored `resources/puzzle/{YEAR}/{DAY}.md`"
+  (:gen-class
+   :name aoc_util.tools
+   :prefix "-"
+   :main false
+   :methods [#^{:static true} [get [String] java.util.List]
+             #^{:static true} [get [String java.lang.Object] java.util.List]
+             #^{:static true} [parseNS [String] java.util.List]
+             #^{:static true} [submit [String Integer Integer] String]
+             #^{:static true} [downloadPuzzle [Integer Integer] java.io.File]])
   (:import [java.net CookieManager URI]
            [java.time ZonedDateTime Period]
            [java.awt Desktop]
            [io.github.furstenheim CopyDown])
   (:require [aoc-util.utils :refer [str->int]]
-            [clojure.java.io :refer [resource reader file make-parents]]
+            [clojure.java.io 
+             :as io
+             :refer [resource reader make-parents]]
             [clojure.string :as str]
             [hato.client :as hc]
             [hickory.core :as hi]
@@ -34,7 +45,7 @@
    (t/>> z p)
    (t/zoned-date-time)))
 
-(defn- parse-ns [ns]
+(defn parse-ns [ns]
   (let [number-cpt [:capture [:+ :digit]]
         r (regal/regex
            [:cat :start
@@ -49,18 +60,22 @@
         [_ year d1? d2? d3?] (re-find r (str ns))]
     (mapv str->int [year (or d1? d2? d3?)])))
 
-(defn- last-modified [path]
-  (-> path file .lastModified (t/new-duration :seconds) t/inst))
+(defn -parseNS [ns]
+  (parse-ns ns))
+
+(defn- last-modified [file]
+  (-> file .lastModified (t/new-duration :seconds) t/inst))
 
 (def ^:private read-session-key
   (delay
-   (if-let [path (resource "session-key.cookie")]
-     (let [cookie (slurp path)
-           modified (t/zoned-date-time (last-modified path))]
-       (if (older-than? modified (t/new-period 1 :months))
-         (throw (Exception.  "Session key expired, pls renew"))
-         (str/trim cookie)))
-     (throw (Exception. "session-key.cookie file not found")))))
+    (let [file (io/file "resources/session-key.cookie")]
+      (if (.exists file)
+        (let [cookie (slurp file)
+              modified (t/zoned-date-time (last-modified file))]
+          (if (older-than? modified (t/new-period 1 :months))
+            (throw (Exception.  "Session key expired, pls renew"))
+            (str/trim cookie)))
+        (throw (Exception. "session-key.cookie file not found"))))))
 
 (defn- add-cookies [^CookieManager cm ^String url cookies]
   (let [cookie-list (map #(str/join "=" %) cookies)]
@@ -72,18 +87,23 @@
    (-> (CookieManager.)
        (add-cookies host {"session" @read-session-key}))))
 
-(defn- download-puzzle
+(defn download-puzzle
   "Puzzle id `year/day`"
-  [year day]
+  ^java.io.File 
+  [^Integer year ^Integer day]
   (let [puzzle-id (format "%s/%s" year day)
-        puzzle-path (resource (format "puzzle/%s.%s" puzzle-id "txt"))]
-    (or
-     puzzle-path
-     (let [input (:body (hc/get (format "%s/%s/day/%s/input" host year day)
-                                {:http-client {:cookie-handler @Cookie-Manager}}))]
-       (make-parents (format "resources/puzzle/%s.%s" puzzle-id "txt"))
-       (spit (format "resources/puzzle/%s.%s" puzzle-id "txt") input)
-       (resource (format "puzzle/%s.%s" puzzle-id "txt"))))))
+        puzzle-path (format "resources/puzzle/%s.%s" puzzle-id "txt")
+        puzzle (io/file puzzle-path)]
+    (if (.exists puzzle)
+      puzzle
+      (let [input (:body (hc/get (format "%s/%s/day/%s/input" host year day)
+                                 {:http-client {:cookie-handler @Cookie-Manager}}))]
+        (make-parents (format "resources/puzzle/%s.%s" puzzle-id "txt"))
+        (spit (format "resources/puzzle/%s.%s" puzzle-id "txt") input)
+        (io/file puzzle-path)))))
+
+(defn -downloadPuzzle [year day]
+  (download-puzzle year day))
 
 (defn get!
   "puzzle-id `{ns}.{year}.day{x}` e.g. *ns*
@@ -96,6 +116,12 @@
      (println (format "input for: year %s day %s" year day))
      (with-open [rdr (reader (download-puzzle year day))]
        (mapv parser (line-seq rdr))))))
+
+(defn -get 
+  ([^String ns fn]
+   (get! ns fn))
+  ([^String ns]
+   (get! ns identity)))
 
 (defn submit!
   "Takes the namespace `{ns}.{year}.day{x}`, which part [1 2] and the answer"
@@ -114,6 +140,9 @@
      (-> (hs/select (hs/child (hs/tag "main")
                               hs/first-child
                               (hs/tag "p")) site) first :content first str/trim))))
+
+(defn -submit [puzzle-id part answer]
+  (submit! puzzle-id part answer))
 
 (defn submit!1 [answer]
   (submit! *ns* 1 answer))
@@ -164,6 +193,8 @@
 (comment
 
   (download-description "ns.2020.day2")
+
+  (get! "2020.23" identity)
 
   (open "ns.2020.day2")
 

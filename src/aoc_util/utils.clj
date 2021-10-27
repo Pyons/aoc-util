@@ -1,9 +1,13 @@
 (ns aoc-util.utils
   "Helper functions"
+(:gen-class
+   :name aoc_util.utils
+   :prefix "-"
+   :main false
+   :methods [#^{:static true} [numbersFromStr [String] java.util.List]
+             #^{:static true} [strInt [String] Integer]])
   (:import [java.io BufferedReader StringReader])
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :refer [input-stream]]
-            [hato.client :as hc]))
+  (:require [clojure.edn :as edn]))
 
 (defmacro save
   "Executes a body, if an excetption throws, 
@@ -61,14 +65,17 @@
       (save
         (Integer/parseInt n)))))
 
-(defn str->int [s]
-  (save (Integer/parseInt s)))
+(defn -strInt [s]
+  (str->int s))
 
 (defn numbers-from-str
   "Retrieves all numbers from a string
   returns a list of numbers"
   [^String str]
   (map edn/read-string (re-seq #"\d+" str)))
+
+(defn -numbersFromStr [^String s]
+  (numbers-from-str s))
 
 (defn line-process
   "Process a string line by line
