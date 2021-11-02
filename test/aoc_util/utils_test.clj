@@ -16,20 +16,18 @@
          (line-process 5) nil
          (line-process "") '()
          (line-process "1\n2\n3\n") ["1" "2" "3"]
-         (line-process  "1\n2\n3\n" str->int) [1 2 3])))
+         (line-process "1\n2\n3\n" str->int) [1 2 3])))
 
 (deftest UpdateValues
   (testing "Update values inside map"
-    (let [test-map {:year 2020 :age {:n 26} :d 5}]
       (are [x y] =
            (update-vals test-map [:year [:age :n] :d] inc) 
-           {:year 2021, :age {:n 27} :d 6}
+           {:year 2021 :age {:n 27} :d 6}
            (update-vals test-map [:year [:age :n] :d] str)
-           {:year "2020" , :age {:n "26"} :d "5"}))))
+           {:year "2020" :age {:n "26"} :d "5"})))
 
 (deftest numbers-of-string
-  (are [x y] = 
-       (numbers-of-string nil) nil
-       (numbers-from-str "") '()
-       (numbers-from-str "test12test21sfsd") '(12 21)
-       (numbers-from-str "1 2") '(1 2)))
+  (are [x y]  (= (numbers-from-str x) y)
+       "" '()
+       "test12test21sfsd" '(12 21)
+       "1 2" '(1 2)))

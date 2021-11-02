@@ -15,18 +15,17 @@
    :prefix "-"
    :main false
    :methods [#^{:static true} [get [String] java.util.List]
-             #^{:static true} [get [String java.lang.Object] java.util.List]
+             #^{:static true} [open [String]]
              #^{:static true} [parseNS [String] java.util.List]
              #^{:static true} [submit [String Integer Integer] String]
+             #^{:static true} [downloadDescription [String] String]
              #^{:static true} [downloadPuzzle [Integer Integer] java.io.File]])
   (:import [java.net CookieManager URI]
            [java.time ZonedDateTime Period]
            [java.awt Desktop]
            [io.github.furstenheim CopyDown])
   (:require [aoc-util.utils :refer [str->int]]
-            [clojure.java.io 
-             :as io
-             :refer [resource reader make-parents]]
+            [clojure.java.io :as io :refer [reader make-parents]]
             [clojure.string :as str]
             [hato.client :as hc]
             [hickory.core :as hi]
@@ -68,14 +67,14 @@
 
 (def ^:private read-session-key
   (delay
-    (let [file (io/file "resources/session-key.cookie")]
-      (if (.exists file)
-        (let [cookie (slurp file)
-              modified (t/zoned-date-time (last-modified file))]
-          (if (older-than? modified (t/new-period 1 :months))
-            (throw (Exception.  "Session key expired, pls renew"))
-            (str/trim cookie)))
-        (throw (Exception. "session-key.cookie file not found"))))))
+   (let [file (io/file "resources/session-key.cookie")]
+     (if (.exists file)
+       (let [cookie (slurp file)
+             modified (t/zoned-date-time (last-modified file))]
+         (if (older-than? modified (t/new-period 1 :months))
+           (throw (Exception.  "Session key expired, pls renew"))
+           (str/trim cookie)))
+       (throw (Exception. "session-key.cookie file not found"))))))
 
 (defn- add-cookies [^CookieManager cm ^String url cookies]
   (let [cookie-list (map #(str/join "=" %) cookies)]
@@ -89,7 +88,7 @@
 
 (defn download-puzzle
   "Puzzle id `year/day`"
-  ^java.io.File 
+  ^java.io.File
   [^Integer year ^Integer day]
   (let [puzzle-id (format "%s/%s" year day)
         puzzle-path (format "resources/puzzle/%s.%s" puzzle-id "txt")
@@ -117,9 +116,7 @@
      (with-open [rdr (reader (download-puzzle year day))]
        (mapv parser (line-seq rdr))))))
 
-(defn -get 
-  ([^String ns fn]
-   (get! ns fn))
+(defn -get
   ([^String ns]
    (get! ns identity)))
 
@@ -176,11 +173,13 @@
          site (-> day-ctx :body hi/parse hi/as-hickory)
          converter (CopyDown.)
          [main] (hs/select (hs/child (hs/tag "main")) site)
-         md (.convert converter
-                      (hr/hickory-to-html main))]
+         md (.convert converter (hr/hickory-to-html main))]
      (make-parents doc-name)
      (spit doc-name md)
-     (resource (format "puzzle/%s.%s" puzzle-id "md")))))
+     doc-name)))
+
+(defn -downloadDescription [ns]
+  (download-description ns))
 
 (defn open
   "Opens the problem with the default browser"
@@ -189,6 +188,8 @@
    (let [[year day] (parse-ns ns)
          url (URI. (format "%s/%s/day/%s" host year day))]
      (.browse (Desktop/getDesktop) url))))
+
+(defn -open [ns] (open ns))
 
 (comment
 
