@@ -15,7 +15,7 @@
    :prefix "-"
    :main false
    :methods [#^{:static true} [get [String] java.util.List]
-             #^{:static true} [open [String]]
+             #^{:static true} [open [String] java.lang.Object]
              #^{:static true} [parseNS [String] java.util.List]
              #^{:static true} [submit [String Integer Integer] String]
              #^{:static true} [downloadDescription [String] String]
