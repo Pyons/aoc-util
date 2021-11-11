@@ -25,7 +25,9 @@
            [java.awt Desktop]
            [io.github.furstenheim CopyDown])
   (:require [aoc-util.utils :refer [str->int]]
-            [clojure.java.io :as io :refer [reader make-parents]]
+            [aoc-util.nvim-socket :refer [edit-file]]
+            [clojure.java.io :as io :refer [reader make-parents file]]
+            [clojure.pprint :refer [pprint]]
             [clojure.string :as str]
             [hato.client :as hc]
             [hickory.core :as hi]
@@ -61,6 +63,48 @@
 
 (defn -parseNS [ns]
   (parse-ns ns))
+
+(defn- increase-day
+  "Increases the namespace"
+  [ns]
+  (let [[_ day] (parse-ns ns)
+        next-day (inc day)
+        re (re-pattern (str day "$"))]
+    (cond
+      (< day 0) (throw (Exception. "Advent of Code days start at 1"))
+      (>= day 25) (throw (Exception. "Advent of Code ends at 25"))
+      :else (str/replace ns re (str next-day)))))
+
+(defn create-next-day
+  "Creates the next Advent of Code day"
+  ([] (create-next-day (increase-day *ns*)))
+  ([ns]
+   (let [next-day ns
+         path (format "src/%s.clj" (str/replace next-day #"\." "/"))
+         f (file path)
+         template (list 'ns (symbol next-day)
+                        '(:require [aoc-util.tools :refer [get! 
+                                                           download-description
+                                                           submit!1
+                                                           submit!2
+                                                           open
+                                                           create-next-day]]
+                                   [aoc-util.nvim-socket :as socket]
+                                   [aoc-util.utils :refer [str->int line-process] :as utils]
+                                   [clojure.edn :refer [read-string] :as edn]
+                                   [clojure.string :as st])
+                        '(def input (get!))
+                        '(comment (download-description)
+                                  (submit!1))
+                        '(comment (download-description)
+                                  (submit!2))
+                        '(comment (create-next-day)))]
+     (if (.exists f)
+       (throw (Exception. "File already exists"))
+       (do
+         (make-parents path)
+         (pprint template (io/writer f))
+         (edit-file path))))))
 
 (defn- last-modified [file]
   (-> file .lastModified (t/new-duration :seconds) t/inst))

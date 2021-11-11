@@ -6,6 +6,7 @@
         hato/hato {:mvn/version "0.8.2"}
         lambdaisland/regal {:mvn/version "0.0.143"}
         io.github.furstenheim/copy_down {:mvn/version "1.0"}
+        com.ensarsarajcic.neovim.java/unix-socket-connection {:mvn/version "0.2.3"}
         hickory/hickory {:mvn/version "0.7.1"}}
  :aliases
  {:codox {:extra-deps {codox-theme-rdash/codox-theme-rdash {:mvn/version "0.1.2"}

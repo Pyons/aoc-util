@@ -65,6 +65,14 @@
       (save
         (Integer/parseInt n)))))
 
+(defn vec-remove
+  "remove elem in coll"
+  [pos coll]
+  (into (subvec coll 0 pos) (subvec coll (inc pos))))
+
+(defn transpose [m]
+  (apply mapv vector m))
+
 (defn -strInt [s]
   (str->int s))
 
@@ -73,6 +81,7 @@
   returns a list of numbers"
   [^String str]
   (map edn/read-string (re-seq #"\d+" str)))
+
 
 (defn -numbersFromStr [^String s]
   (numbers-from-str s))
