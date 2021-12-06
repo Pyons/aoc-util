@@ -23,12 +23,14 @@
   (:import [java.net CookieManager URI]
            [java.time ZonedDateTime Period]
            [java.awt Desktop]
+           [java.io BufferedReader StringReader]
            [io.github.furstenheim CopyDown])
   (:require [aoc-util.utils :refer [str->int]]
             [aoc-util.nvim-socket :refer [edit-file]]
             [clojure.java.io :as io :refer [reader make-parents file]]
             [clojure.pprint :refer [pprint]]
             [clojure.string :as str]
+            [clojure.test :refer [testing deftest is]]
             [hato.client :as hc]
             [hickory.core :as hi]
             [hickory.render :as hr]
@@ -147,6 +149,19 @@
 
 (defn -downloadPuzzle [year day]
   (download-puzzle year day))
+
+(defn parse-input
+  "Equivalent to get! but for strings,
+  helps to use the examples from the puzzle-description"
+  ([s] (parse-input s identity))
+  ([s parser]
+   (with-open [rdr (BufferedReader. (StringReader. s))]
+     (mapv parser (line-seq rdr)))))
+
+(deftest parse-input-test
+  (testing "Test"
+    (is (= ["1" "2"] (parse-input "1\n2\n")))
+   (is (= [1 2] (parse-input "1\n2\n" str->int)))))
 
 (defn get!
   "puzzle-id `{ns}.{year}.day{x}` e.g. *ns*

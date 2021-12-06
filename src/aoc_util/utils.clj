@@ -41,21 +41,6 @@
        (fn [~@lambda-bindings]
          ~@body))))
 
-(defn update-vals
-  "Updates multiple values in a map by applying the same fn
-
-  ```
-  (def user {:year 2020 :age {:n 26}})
-  (update-vals user [:year [:age :n]] inc) ;;=> {:year 2021, :age {:n 27}}
-  ```"
-  [m ks f & args]
-  (reduce
-    (fn [acc k]
-      (let [k (if (vector? k) k [k])]
-        (apply update-in acc k f args)))
-    m
-    ks))
-
 (def
   ^{:doc "Takes a string and tries to parse into an Integer, otherwise nil"
     :arglists '([^String n])}
