@@ -8,6 +8,7 @@
              #^{:static true} [strInt [String] Integer]])
   (:import [java.io BufferedReader StringReader])
   (:require [clojure.data.priority-map :refer [priority-map]]
+            [com.rpl.specter :as S]
             [clojure.edn :as edn]))
 
 (defmacro save
@@ -15,7 +16,8 @@
   catch and print stacktrace to `*err*` but returns `nil`"
   [& body]
   `(try
-     ~@body
+     (do
+       ~@body)
      (catch Exception e#
        (binding [*out* *err*]
          (println (.getMessage e#)))
@@ -74,10 +76,9 @@
 (defn line-process
   "Process a string line by line
   takes a parser fn which is used with mapv, not lazy"
-  ([^String input] (line-process input identity))
-  ([^String input parser]
-   (when (string? input)
-     (mapv parser (line-seq (BufferedReader. (StringReader. input)))))))
+  ([^String input] (line-process input (map identity)))
+  ([^String input parser-xf]
+   (into [] parser-xf (line-seq (BufferedReader. (StringReader. input))))))
 
 (defn dijkstra
   "Computes single-source shortest path distances in a directed graph.
@@ -86,11 +87,52 @@
   as keys and their (non-negative) distance from n as vals.
  
   Returns a map from nodes to their distance from start."
-  [start f]
-  (letfn [(remove-keys [m r]
-            (apply dissoc m (keys r)))]
-    (loop [q (priority-map start 0) r {}]
-      (if-let [[v d] (peek q)]
-        (let [dist (-> (f v) (remove-keys r) (update-vals #(+ d %)))]
-          (recur (merge-with min (pop q) dist) (assoc r v d)))
-        r))))
+  [g start]
+  (loop [frontier (priority-map start 0) explored {}]
+    (if-let [[v total-cost] (peek frontier)]
+      (let [dist (->> (g v)
+                      (S/setval [S/MAP-KEYS explored] S/NONE)
+                      (S/transform
+                       [S/MAP-VALS]
+                       (fn [cost] (+ cost total-cost))))]
+        (recur (merge-with min (pop frontier) dist) (assoc explored v total-cost)))
+      explored)))
+
+(defn dijkstra-seq [g start]
+  (letfn [(explore [frontier explored]
+            (lazy-seq
+             (when-let [[v [total-cost previous-vertex]] (peek frontier)]
+               (let [path (conj (explored previous-vertex []) v)
+                     dist (->> (g v)
+                               (S/setval [S/MAP-KEYS explored] S/NONE)
+                               (S/transform
+                                [S/MAP-VALS]
+                                (fn [cost]
+                                  [(+ cost total-cost) v])))
+                     frontier (merge-with 
+                                (fn [a b]
+                                  (min-key first a b))
+                                (pop frontier)
+                                dist)]
+                 (cons [v total-cost path]
+                       (explore frontier (assoc explored v path)))))))]
+    (explore (priority-map start [0]) {})))
+
+(defn shortest-path [g start dest]
+  (letfn [(destination? [[vertex]]
+            (= vertex dest))]
+    (->> (dijkstra-seq g start)
+         (drop-while (comp not destination?))
+         first
+         peek)))
+
+(comment
+  (def ug {:s {:v 1, :w 4}
+           :v {:w 2, :t 6}
+           :w {:t 3}})
+
+  (dijkstra ug :s)
+
+  (dijkstra-seq ug :s)
+
+  (shortest-path ug :s :w))

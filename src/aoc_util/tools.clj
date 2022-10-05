@@ -7,7 +7,7 @@
   Day: 2
 
   Puzzle inputs are stored `resources/puzzle/{YEAR}/{DAY}.txt`
-  Inputs are cached and reused they never change
+  Inputs are cached and reused as they never change
 
   Puzzle descriptions are stored `resources/puzzle/{YEAR}/{DAY}.md`"
   (:gen-class
@@ -161,7 +161,7 @@
 (deftest parse-input-test
   (testing "Test"
     (is (= ["1" "2"] (parse-input "1\n2\n")))
-   (is (= [1 2] (parse-input "1\n2\n" str->int)))))
+    (is (= [1 2] (parse-input "1\n2\n" str->int)))))
 
 (defn get!
   "puzzle-id `{ns}.{year}.day{x}` e.g. *ns*

@@ -18,15 +18,15 @@
   (let [nvim-process-id (loop [cnt 0 pr (ProcessHandle/current)]
                           (let [process-info (.info pr)
                                 cmd (.get (.command process-info))]
-                            (cond 
+                            (cond
                               (> cnt 10) (throw (Exception. "Couldn't find nvim process"))
                               (re-find #"nvim$" cmd) (.pid pr)
-                              :else (recur (inc cnt)(.get (.parent pr))))))
+                              :else (recur (inc cnt) (.get (.parent pr))))))
         lsof-out (:out (sh/sh "lsof" "-p" (str nvim-process-id)))
         filter-lsof (->> lsof-out
                          string-reader
                          line-seq
-                         (filter #(re-find #"/tmp/nvim.*STREAM \(LISTEN\)$" %)) first)]
+                         (filter #(re-find #"/nvim.*STREAM \(LISTEN\)$" %)) first)]
     (-> filter-lsof (str/split #"\s+") (nth 8))))
 
 (def socket (delay (find-socket)))
@@ -34,31 +34,31 @@
 (def socket-connection (delay (UnixDomainSocketRpcConnection. @socket-file)))
 (def client (RpcClient/getDefaultAsyncInstance))
 
-(defn exec 
-  "Ex command `cmd` to send to nvim socket" 
+(defn exec
+  "Ex command `cmd` to send to nvim socket"
   [^String cmd]
   (.attach client @socket-connection)
   (.send client (doto
-                  (RequestMessage$Builder. "nvim_exec")
+                 (RequestMessage$Builder. "nvim_exec")
                   (.addArgument cmd)
                   (.addArgument false))))
 
-(defn snd-keys 
+(defn snd-keys
   "Sends the keys strokes `k` to nvim e.g. 'jjjj'"
   [^String k]
   (.attach client @socket-connection)
-  (.send client (doto 
-                  (RequestMessage$Builder. "nvim_feedkeys")
+  (.send client (doto
+                 (RequestMessage$Builder. "nvim_feedkeys")
                   (.addArgument k)
-                  (.addArgument "") 
+                  (.addArgument "")
                   (.addArgument false))))
 
-(defn get-line 
+(defn get-line
   "Sends the keys strokes `k` to nvim e.g. 'jjjj'"
   [consumer]
   (.attach client @socket-connection)
-  (.send client (doto 
-                  (RequestMessage$Builder. "nvim_get_current_line")) consumer))
+  (.send client (doto
+                 (RequestMessage$Builder. "nvim_get_current_line")) consumer))
 
 (defn edit-file
   "Opens the file in nvim :edit f
@@ -75,6 +75,4 @@
 
   (get-line consumer)
 
-  (find-socket)
-
-)
+  (find-socket))
