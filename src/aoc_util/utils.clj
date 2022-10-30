@@ -42,7 +42,8 @@
     `(defn ~name ~doc-str?
        [~@bindings]
        (fn [~@lambda-bindings]
-         ~@body))))
+         (do
+           ~@body)))))
 
 (def
   ^{:doc "Takes a string and tries to parse into an Integer, otherwise nil"
