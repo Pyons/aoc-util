@@ -30,7 +30,7 @@ deps.edn
 
 ```clojure
 :deps
-    {pyons/aoc-util {:git/url "https://github.com/pyons/aoc-util" :git/tag "v0.0.2" :git/sha "177557c"}
+    {pyons/aoc-util {:git/url "https://github.com/pyons/aoc-util" :git/tag "v0.0.4" :git/sha "8afb2b6"}
 ```
 
 ## Examples
