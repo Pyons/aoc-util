@@ -5,7 +5,7 @@
         org.clojure/test.check {:mvn/version "1.1.1"}
         tick/tick {:mvn/version "0.5.0"}
         org.clojure/data.priority-map {:mvn/version "1.1.0"}
-        hato/hato {:mvn/version "0.8.2"}
+        hato/hato {:mvn/version "0.9.0"}
         lambdaisland/regal {:mvn/version "0.0.143"}
         io.github.furstenheim/copy_down {:mvn/version "1.1"}
         com.ensarsarajcic.neovim.java/unix-socket-connection {:mvn/version "0.4.6"}
@@ -24,11 +24,11 @@
   :run-x {:ns-default aoc-util.aoc-util
           :exec-fn greet
           :exec-args {:name "Clojure"}}
-  :test {:extra-paths ["test"]
+  :test {:extra-paths ["test" "src"]
          :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
                       io.github.cognitect-labs/test-runner
                       {:git/url "https://github.com/cognitect-labs/test-runner"
-                       :sha "a522ab2851a2aa5bf9c22a942b45287a3a019310"}}
+                       :sha "7284cda41fb9edc0f3bc6b6185cfb7138fc8a023"}}
          :exec-fn cognitect.test-runner.api/test}
   :build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}}
           :ns-default build}

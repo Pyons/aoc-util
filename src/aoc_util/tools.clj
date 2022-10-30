@@ -30,7 +30,6 @@
             [clojure.java.io :as io :refer [reader make-parents file]]
             [clojure.pprint :refer [pprint]]
             [clojure.string :as str]
-            [clojure.test :refer [testing deftest is]]
             [hato.client :as hc]
             [hickory.core :as hi]
             [hickory.render :as hr]
@@ -85,7 +84,7 @@
          path (format "src/%s.clj" (str/replace next-day #"\." "/"))
          f (file path)
          template (list 'ns (symbol next-day)
-                        '(:require [aoc-util.tools :refer [get! 
+                        '(:require [aoc-util.tools :refer [get!
                                                            download-description
                                                            submit!1
                                                            submit!2
@@ -97,9 +96,9 @@
                                    [clojure.string :as st])
                         '(def input (get!))
                         '(comment (download-description)
-                                  (submit!1))
+                                  (submit-first!))
                         '(comment (download-description)
-                                  (submit!2))
+                                  (submit-second!))
                         '(comment (create-next-day)))]
      (if (.exists f)
        (throw (Exception. "File already exists"))
@@ -113,14 +112,14 @@
 
 (def ^:private read-session-key
   (delay
-   (let [file (io/file "resources/session-key.cookie")]
-     (if (.exists file)
-       (let [cookie (slurp file)
-             modified (t/zoned-date-time (last-modified file))]
-         (if (older-than? modified (t/new-period 1 :months))
-           (throw (Exception.  "Session key expired, pls renew"))
-           (str/trim cookie)))
-       (throw (Exception. "session-key.cookie file not found"))))))
+    (let [file (io/file "resources/session-key.cookie")]
+      (if (.exists file)
+        (let [cookie (slurp file)
+              modified (t/zoned-date-time (last-modified file))]
+          (if (older-than? modified (t/new-period 1 :months))
+            (throw (Exception.  "Session key expired, pls renew"))
+            (str/trim cookie)))
+        (throw (Exception. "session-key.cookie file not found"))))))
 
 (defn- add-cookies [^CookieManager cm ^String url cookies]
   (let [cookie-list (map #(str/join "=" %) cookies)]
@@ -129,8 +128,8 @@
 
 (def ^:private Cookie-Manager
   (delay
-   (-> (CookieManager.)
-       (add-cookies host {"session" @read-session-key}))))
+    (-> (CookieManager.)
+        (add-cookies host {"session" @read-session-key}))))
 
 (defn download-puzzle
   "Puzzle id `year/day`"
@@ -157,11 +156,6 @@
   ([s parser]
    (with-open [rdr (BufferedReader. (StringReader. s))]
      (mapv parser (line-seq rdr)))))
-
-(deftest parse-input-test
-  (testing "Test"
-    (is (= ["1" "2"] (parse-input "1\n2\n")))
-    (is (= [1 2] (parse-input "1\n2\n" str->int)))))
 
 (defn get!
   "puzzle-id `{ns}.{year}.day{x}` e.g. *ns*
@@ -200,10 +194,10 @@
 (defn -submit [puzzle-id part answer]
   (submit! puzzle-id part answer))
 
-(defn submit!1 [answer]
+(defn submit-first! [answer]
   (submit! *ns* 1 answer))
 
-(defn submit!2 [answer]
+(defn submit-second! [answer]
   (submit! *ns* 2 answer))
 
 (defn download-examples
@@ -248,7 +242,8 @@
          url (URI. (format "%s/%s/day/%s" host year day))]
      (.browse (Desktop/getDesktop) url))))
 
-(defn -open [ns] (open ns))
+(defn -open [ns]
+  (open ns))
 
 (comment
 

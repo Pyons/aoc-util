@@ -76,7 +76,8 @@
 (defn line-process
   "Process a string line by line
   takes a parser fn which is used with mapv, not lazy"
-  ([^String input] (line-process input (map identity)))
+  ([^String input]
+   (line-process input (map identity)))
   ([^String input parser-xf]
    (into [] parser-xf (line-seq (BufferedReader. (StringReader. input))))))
 
@@ -109,11 +110,11 @@
                                 [S/MAP-VALS]
                                 (fn [cost]
                                   [(+ cost total-cost) v])))
-                     frontier (merge-with 
-                                (fn [a b]
-                                  (min-key first a b))
-                                (pop frontier)
-                                dist)]
+                     frontier (merge-with
+                               (fn [a b]
+                                 (min-key first a b))
+                               (pop frontier)
+                               dist)]
                  (cons [v total-cost path]
                        (explore frontier (assoc explored v path)))))))]
     (explore (priority-map start [0]) {})))
