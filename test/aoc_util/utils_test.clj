@@ -1,12 +1,12 @@
 (ns aoc-util.utils-test
   (:require [clojure.test :refer [deftest are is testing]]
-            [aoc-util.utils :refer [dijkstra dijkstra-seq shortest-path numbers-from-str str->int]]))
+            [aoc-util.utils :refer [dijkstra dijkstra-seq shortest-path numbers-from-str parse-int line-process]]))
 
 (deftest str-to-int
   (testing "String to Integer"
-    (are [x y] (= (str->int x) y)
-      nil nil
-      5 nil
+    (are [x y] (= (parse-int x) y)
+      "" nil
+      "a" nil
       "10" 10)))
 
 (deftest line-parsing
@@ -16,9 +16,9 @@
       (line-process 5) nil
       (line-process "") '()
       (line-process "1\n2\n3\n") ["1" "2" "3"]
-      (line-process "1\n2\n3\n" str->int) [1 2 3])))
+      (line-process "1\n2\n3\n" (map parse-int)) [1 2 3])))
 
-(deftest UpdateValues
+(deftest update-values
   (testing "Update values inside map"
     (are [x y] =
       (update-vals test-map [:year [:age :n] :d] inc)

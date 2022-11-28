@@ -20,25 +20,32 @@
              #^{:static true} [submit [String Integer Integer] String]
              #^{:static true} [downloadDescription [String] String]
              #^{:static true} [downloadPuzzle [Integer Integer] java.io.File]])
-  (:import [java.net CookieManager URI]
-           [java.time ZonedDateTime Period]
-           [java.awt Desktop]
-           [java.io BufferedReader StringReader]
-           [io.github.furstenheim CopyDown])
-  (:require [aoc-util.utils :refer [str->int]]
-            [aoc-util.nvim-socket :refer [edit-file]]
-            [clojure.java.io :as io :refer [reader make-parents file]]
-            [clojure.pprint :refer [pprint]]
-            [clojure.string :as str]
-            [hato.client :as hc]
-            [hickory.core :as hi]
-            [hickory.render :as hr]
-            [hickory.select :as hs]
-            [lambdaisland.regal :as regal]
-            [tick.core :as t]))
+  (:require
+   [aoc-util.utils :refer [parse-int]]
+   [clojure.java.io :as io :refer [file make-parents reader]]
+   [clojure.pprint :refer [pprint] :as pp]
+   [clojure.reflect :as reflect]
+   [clojure.inspector :as insp]
+   [clojure.string :as str]
+   [hato.client :as hc]
+   [hickory.core :as hi]
+   [hickory.render :as hr]
+   [clojure.java.javadoc :as jdoc]
+   [hickory.select :as hs]
+   [lambdaisland.regal :as regal]
+   [tick.core :as t])
+  (:import
+   [io.github.furstenheim CopyDown]
+   [java.awt Desktop]
+   [java.io BufferedReader StringReader]
+   [java.net CookieManager URI]
+   [java.time Period ZonedDateTime]))
 
 (def ^{:doc "Advent of Code Server" :private true}
   host "https://adventofcode.com")
+
+(def ^:private session-cookie-path
+  "resources/session-key.cookie")
 
 (defn- older-than?
   "Checks if a `ZonedDateTime` z is older than `Period` p"
@@ -60,7 +67,7 @@
              number-cpt]
             :end])
         [_ year d1? d2? d3?] (re-find r (str ns))]
-    (mapv str->int [year (or d1? d2? d3?)])))
+    (mapv parse-int [year (or d1? d2? d3?)])))
 
 (defn -parseNS [ns]
   (parse-ns ns))
@@ -83,36 +90,40 @@
    (let [next-day ns
          path (format "src/%s.clj" (str/replace next-day #"\." "/"))
          f (file path)
-         template (list 'ns (symbol next-day)
-                        '(:require [aoc-util.tools :refer [get!
-                                                           download-description
-                                                           submit!1
-                                                           submit!2
-                                                           open
-                                                           create-next-day]]
-                                   [aoc-util.nvim-socket :as socket]
-                                   [aoc-util.utils :refer [str->int line-process] :as utils]
-                                   [clojure.edn :refer [read-string] :as edn]
-                                   [clojure.string :as st])
-                        '(def input (get!))
-                        '(comment (download-description)
-                                  (submit-first!))
-                        '(comment (download-description)
-                                  (submit-second!))
-                        '(comment (create-next-day)))]
-     (if (.exists f)
-       (throw (Exception. "File already exists"))
-       (do
-         (make-parents path)
-         (pprint template (io/writer f))
-         (edit-file path))))))
+         template [(list 'ns (symbol next-day)
+                         '(:require [aoc-util.tools :refer [create-next-day
+                                                            download-description
+                                                            get!
+                                                            open-browser
+                                                            submit-first!
+                                                            submit-second!]]
+                                    [aoc-util.utils :refer [parse-int line-process] :as utils]
+                                    [clojure.edn :refer [read-string] :as edn]
+                                    [clojure.string :as st]))
+                   '(def input (get!))
+                   '(comment (download-description)
+                             (submit-first!))
+                   '(comment (download-description)
+                             (submit-second!))
+                   '(comment (create-next-day))]]
+     (make-parents path)
+     (with-open [f (io/writer f)]
+       (doseq [line template]
+         (pprint line f)
+         (.newLine f))))))
 
 (defn- last-modified [file]
   (-> file .lastModified (t/new-duration :seconds) t/inst))
 
+(defn set-session-cookie!
+  "Write your session cookie to the right file, for later use"
+  [^String cookie]
+  (make-parents session-cookie-path)
+  (spit session-cookie-path cookie))
+
 (def ^:private read-session-key
   (delay
-    (let [file (io/file "resources/session-key.cookie")]
+    (let [file (io/file session-cookie-path)]
       (if (.exists file)
         (let [cookie (slurp file)
               modified (t/zoned-date-time (last-modified file))]
@@ -234,24 +245,34 @@
 (defn -downloadDescription [ns]
   (download-description ns))
 
-(defn open
+(defn open-browser
   "Opens the problem with the default browser"
-  ([] (open *ns*))
+  ([] (open-browser *ns*))
   ([ns]
    (let [[year day] (parse-ns ns)
          url (URI. (format "%s/%s/day/%s" host year day))]
      (.browse (Desktop/getDesktop) url))))
 
 (defn -open [ns]
-  (open ns))
+  (open-browser ns))
 
 (comment
 
+  (jdoc/javadoc #"sdf")
+  (ancestors (type #"sdf"))
+
+  (->> (reflect/reflect java.io.InputStream) :members (sort-by :name) (pp/print-table [:name :flags :parameter-types :return-type]))
+
+
+  (reflect/reflect "sdfsdf")
+  (set-session-cookie! "Test")
   (download-description "ns.2020.day2")
 
   (get! "2020.23" identity)
 
-  (open "ns.2020.day2")
+  (open-browser "ns.2020.day2")
+  (parse-ns "ns.2020.day2")
+  (create-next-day "ns.2020.day2")
 
   ;; gets the input for the puzzle
   (get! "ns.2020.day2" identity))

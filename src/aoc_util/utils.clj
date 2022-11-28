@@ -6,10 +6,12 @@
    :main false
    :methods [#^{:static true} [numbersFromStr [String] java.util.List]
              #^{:static true} [strInt [String] Integer]])
-  (:import [java.io BufferedReader StringReader])
-  (:require [clojure.data.priority-map :refer [priority-map]]
-            [com.rpl.specter :as S]
-            [clojure.edn :as edn]))
+  (:require
+   [clojure.data.priority-map :refer [priority-map]]
+   [clojure.edn :as edn]
+   [com.rpl.specter :as S])
+  (:import
+   [java.io BufferedReader StringReader]))
 
 (defmacro save
   "Executes a body, if an excetption throws, 
@@ -20,8 +22,8 @@
        ~@body)
      (catch Exception e#
        (binding [*out* *err*]
-         (println (.getMessage e#)))
-       (.printStackTrace e#))))
+         (println (.getMessage e#))
+         (.printStackTrace e#)))))
 
 (defmacro define
   "Inspired from scheme to shortcut functions which return a
@@ -45,25 +47,28 @@
          (do
            ~@body)))))
 
-(def
-  ^{:doc "Takes a string and tries to parse into an Integer, otherwise nil"
-    :arglists '([^String n])}
-  str->int
-  (memoize
-   (fn [^String n]
-     (save
-      (Integer/parseInt n)))))
+(defn parse-int
+  "Takes a string and tries to parse into an Integer, otherwise nil"
+  [^String s]
+  (if (string? s)
+    (try
+      (Integer/parseInt s)
+      (catch NumberFormatException _ nil))
+    (throw (IllegalArgumentException. "Not a string"))))
+
 
 (defn vec-remove
-  "remove elem in coll"
+  "remove elem in coll, returns a subvector"
   [coll pos]
   (into (subvec coll 0 pos) (subvec coll (inc pos))))
+
 
 (defn transpose [m]
   (apply mapv vector m))
 
+
 (defn -strInt [s]
-  (str->int s))
+  (parse-int s))
 
 (defn numbers-from-str
   "Retrieves all numbers from a string
@@ -76,7 +81,7 @@
 
 (defn line-process
   "Process a string line by line
-  takes a parser fn which is used with mapv, not lazy"
+  takes a parser fn (transducer) which is used with mapv, not lazy"
   ([^String input]
    (line-process input (map identity)))
   ([^String input parser-xf]
@@ -123,10 +128,14 @@
 (defn shortest-path [g start dest]
   (letfn [(destination? [[vertex]]
             (= vertex dest))]
-    (->> (dijkstra-seq g start)
-         (drop-while (comp not destination?))
-         first
-         peek)))
+    (let [xf (comp 
+               (drop-while (comp not destination?))
+               (take 1))]
+      (peek
+        (first
+          (transduce
+            xf
+            conj [] (dijkstra-seq g start)))))))
 
 (comment
   (def ug {:s {:v 1, :w 4}
