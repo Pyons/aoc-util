@@ -24,13 +24,10 @@
    [aoc-util.utils :refer [parse-int]]
    [clojure.java.io :as io :refer [file make-parents reader]]
    [clojure.pprint :refer [pprint] :as pp]
-   [clojure.reflect :as reflect]
-   [clojure.inspector :as insp]
    [clojure.string :as str]
    [hato.client :as hc]
    [hickory.core :as hi]
    [hickory.render :as hr]
-   [clojure.java.javadoc :as jdoc]
    [hickory.select :as hs]
    [lambdaisland.regal :as regal]
    [tick.core :as t])
@@ -59,15 +56,18 @@
         r (regal/regex
            [:cat :start
             [:* [:cat [:+ :word] "."]]
-            [:capture [:+ :digit]]
-            "."
+            [:alt 
+             [:cat "year" number-cpt]
+             [:cat "y" number-cpt]
+             number-cpt] 
+            [:alt  "." "/"]
             [:alt
              [:cat "day" number-cpt]
              [:cat "d" number-cpt]
              number-cpt]
             :end])
-        [_ year d1? d2? d3?] (re-find r (str ns))]
-    (mapv parse-int [year (or d1? d2? d3?)])))
+        [_ y1? y2? y3? d1? d2? d3?] (re-find r (name ns))]
+    (mapv parse-int [(or y1? y2? y3?) (or d1? d2? d3?)])))
 
 (defn -parseNS [ns]
   (parse-ns ns))
@@ -145,7 +145,7 @@
 (defn download-puzzle
   "Puzzle id `year/day`"
   ^java.io.File
-  [^Integer year ^Integer day]
+  [year day]
   (let [puzzle-id (format "%s/%s" year day)
         puzzle-path (format "resources/puzzle/%s.%s" puzzle-id "txt")
         puzzle (io/file puzzle-path)]
@@ -161,7 +161,7 @@
   (download-puzzle year day))
 
 (defn parse-input
-  "Equivalent to get! but for strings,
+  "Like get! but for strings,
   helps to use the examples from the puzzle-description"
   ([s] (parse-input s identity))
   ([s parser]
@@ -169,16 +169,19 @@
      (mapv parser (line-seq rdr)))))
 
 (defn get!
-  "puzzle-id `{ns}.{year}.day{x}` e.g. *ns*
-  defaults to current namespace
-  default parser `identity`"
-  ([] (get! *ns* identity))
-  ([parser] (get! *ns* parser))
-  ([puzzle-id parser]
-   (let [[year day] (parse-ns puzzle-id)]
-     (println (format "input for: year %s day %s" year day))
-     (with-open [rdr (reader (download-puzzle year day))]
-       (mapv parser (line-seq rdr))))))
+  "defaults to current namespace default parser `identity`"
+  ([] 
+   (let [[year day] (parse-ns *ns*)]
+     (get! year day identity)))
+  ([parser] 
+   (let [[year day] (parse-ns *ns*)]
+     (get! year day parser)))
+  ([ns parser]
+   (let [[year day] (parse-ns ns)]
+     (get! year day parser)) )
+  ([year day parser] 
+   (with-open [rdr (reader (download-puzzle year day))]
+     (mapv parser (line-seq rdr)))))
 
 (defn -get
   ([^String ns]
@@ -186,9 +189,11 @@
 
 (defn submit!
   "Takes the namespace `{ns}.{year}.day{x}`, which part [1 2] and the answer"
-  ([^Integer part ^Integer answer]
+  ([part answer]
    (submit! *ns* part answer))
-  ([puzzle-id ^Integer part ^Integer answer]
+  ([year day part ^Integer answer]
+   (submit! (str year "." day) part answer))
+  ([puzzle-id part ^Integer answer]
    (let [[year day] (parse-ns puzzle-id)
          _ (println (format "submitting for: year %s day %s part %s" year day part))
          req (hc/post
@@ -258,20 +263,14 @@
 
 (comment
 
-  (jdoc/javadoc #"sdf")
-  (ancestors (type #"sdf"))
-
-  (->> (reflect/reflect java.io.InputStream) :members (sort-by :name) (pp/print-table [:name :flags :parameter-types :return-type]))
-
-
-  (reflect/reflect "sdfsdf")
   (set-session-cookie! "Test")
   (download-description "ns.2020.day2")
 
-  (get! "2020.23" identity)
+  (get! :2020.2 identity)
 
   (open-browser "ns.2020.day2")
-  (parse-ns "ns.2020.day2")
+  (parse-ns "2020/2")
+  (parse-ns :2020.2)
   (create-next-day "ns.2020.day2")
 
   ;; gets the input for the puzzle

@@ -1,7 +1,7 @@
 (ns aoc-util.tools-test
   (:require [clojure.test :refer [deftest testing is are]]
             [clojure.java.io :as io]
-            [aoc-util.utils :refer [str->int]]
+            [aoc-util.utils :refer [parse-int]]
             [aoc-util.tools :refer [download-puzzle parse-ns parse-input]]))
 
 (deftest namespace-parser
@@ -34,4 +34,4 @@
 (deftest parse-input-test
   (testing "Test"
     (is (= ["1" "2"] (parse-input "1\n2\n")))
-    (is (= [1 2] (parse-input "1\n2\n" str->int)))))
+    (is (= [1 2] (parse-input "1\n2\n" parse-int)))))
