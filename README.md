@@ -3,20 +3,32 @@
 
 ## Rationale
 
-We want to be able to read the puzzle description, solve and submit it without leaving the repl.
+We want to be able to read the puzzle description, solve and submit it without leaving the repl or editor.
 
-For this we have to be able to download the description and the puzzle input. This library offers some convenience functions.
+For this we have to be able to download the description and the puzzle input. This library offers some helper functions.
+
+The library is split into two namespaces, `aoc-utils.tools` which contains all functions you need to interact with advent of code.
+And `aoc-utils.utils` which contains conviencece functions to parse and solve puzzles.
 
 ```clojure
-(get!) ;;=> returns the input as a vector of strings, parsing the current namespace to infer the puzzle day
 
-(get! "2020.7") ;;=> returns the input as a vector of strings
+(set-session-cookie! "33617c7465645f5..........................7701afc0")
 
-(get! "2020.7" str->int) ;;=> You can pass an optional function, defaults to the identity fn
+(get!) ;;=> returns the puzzle input as a vector of strings, parsing the current namespace to infer the puzzle day
 
-(submit! 1 0) ;;=> Submit Puzzle answer part 1 answer 0, for the current namespace
+(get! 2022 1 identity) ;;=> returns the input as a vector of strings
 
-(download-description) ;;=> Downloads the Puzzle description to resources/puzzle/{YEAR}/{DAY}.md 
+(get! 2022 7 parse-long) ;;=> You can pass a function to be mapped over the lines
+
+(get! parse-long) ;;=> returns the puzzle input as a vector of strings, mapping parse-long over each line
+
+(submit-first! 0) ;;=> Submit Puzzle answer part 1 answer 0, for the current namespace
+
+(submit-second! 0) ;;=> Submit Puzzle answer part 2 answer 0, for the current namespace
+
+(download-description) ;;=> Downloads the Puzzle description to resources/puzzle/{YEAR}/{DAY}.md and converts it to markdown
+
+(create-next-day) ;; => Creates a new file with your namespace and increasing the day value. e.g. se.2022.day1 -> se.2022.day2
 ```
 
 ## Docs
@@ -30,16 +42,31 @@ deps.edn
 
 ```clojure
 :deps
-    {pyons/aoc-util {:git/url "https://github.com/pyons/aoc-util" :git/tag "v0.0.4" :git/sha "8afb2b6"}
+    pyons/aoc-util {:git/url "https://github.com/pyons/aoc-util" :git/tag "v0.2.2" :git/sha "6010da5"}
 ```
 
-## Examples
+## Example
 
 ```clojure
-(ns se.2020.day1
-  (:require [aoc-util.util :refer [get! str->int download-description]]))
+(ns se.2022.day1
+  (:require [aoc-util.tools :refer
+             [get!
+              set-session-cookie!
+              download-description
+              submit-first!
+              submit-second!
+              create-next-day]]
+            [aoc-util.utils :refer [split-by]]))
 
-(def input (get!)) ;; gets the input for the puzzle year 2020 day 1
+(def input (get!)) ;; gets the input for the puzzle year 2022 day 1
+
+(comment
+    (set-session-cookie! "5361762...01afc0")
+
+    (submit-first! 0)
+    (submit-second! 0)
+ 
+    (create-next-day))
 ```
 
 ## License
