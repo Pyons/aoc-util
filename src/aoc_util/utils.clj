@@ -67,6 +67,43 @@
   (apply mapv vector m))
 
 
+(defn split-by
+  "Applies f to each value in coll, splitting it each time f returns 
+  true, removing the value from the result. Returns a lazy seq of
+  partitions. Returns a stateful transducer when no collection is
+  provided."
+  {:static true}
+  ([pred]
+   (fn [rf]
+     (let [a (java.util.ArrayList.)]
+       (fn
+         ([] (rf))
+         ([result]
+          (let [result (if (.isEmpty a)
+                         result
+                         (let [v (vec (.toArray a))]
+                           (.clear a)
+                           (unreduced (rf result v))))]
+            (rf result)))
+         ([result input]
+          (if (pred input)
+            (if (.isEmpty a)
+              result
+              (let [p (vec (.toArray a))]
+                (.clear a)
+                (rf result p)))
+            (do
+              (.add a input)
+              result)))))))
+  ([pred coll]
+   (lazy-seq
+     (when-let [s (seq coll)]
+       (let [t (take-while (complement pred) s)]
+         (if (empty? t)
+           (split-by pred (drop-while pred s))
+           (cons t (split-by pred (lazy-seq (drop (count t) s))))))))))
+
+
 (defn -strInt [s]
   (parse-int s))
 
