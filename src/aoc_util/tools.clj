@@ -66,7 +66,7 @@
              [:cat "d" number-cpt]
              number-cpt]
             :end])
-        [_ y1? y2? y3? d1? d2? d3?] (re-find r (name ns))]
+        [_ y1? y2? y3? d1? d2? d3?] (re-find r (str ns))]
     (mapv parse-int [(or y1? y2? y3?) (or d1? d2? d3?)])))
 
 (defn -parseNS [ns]
