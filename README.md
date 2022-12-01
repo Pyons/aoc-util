@@ -31,6 +31,10 @@ And `aoc-utils.utils` which contains conviencece functions to parse and solve pu
 (create-next-day) ;; => Creates a new file with your namespace and increasing the day value. e.g. se.2022.day1 -> se.2022.day2
 ```
 
+## Session
+
+![nvim session](https://github.com/Pyons/aoc-util/blob/master/day1.png?raw=true)
+
 ## Docs
 
 [https://pyons.github.io/aoc-util/](https://pyons.github.io/aoc-util/)
