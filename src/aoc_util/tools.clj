@@ -98,8 +98,7 @@
                                                             submit-first!
                                                             submit-second!]]
                                     [aoc-util.utils :refer [parse-int line-process] :as utils]
-                                    [clojure.edn :refer [read-string] :as edn]
-                                    [clojure.string :as st]))
+                                    [clojure.string :as str]))
                    '(def input (get!))
                    '(comment (download-description)
                              (submit-first!))
