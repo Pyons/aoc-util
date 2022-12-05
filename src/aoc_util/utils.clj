@@ -104,6 +104,15 @@
            (cons t (split-by pred (lazy-seq (drop (count t) s))))))))))
 
 
+(defn indexed-coll 
+  "Takes a coll and returns a lazy-seq of vectors [i v]
+  where v is a value from the input coll "
+  [coll]
+  (if (counted? coll)
+    (map vector (range (long (count coll))) coll)
+    (map vector (range) coll)))
+
+
 (defn -strInt [s]
   (parse-int s))
 
