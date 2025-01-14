@@ -1,5 +1,5 @@
 {:aliases
- {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.5" :git/sha "9c738da"}}
+ {:build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.6" :git/sha "52cf7d6"}}
           :ns-default build}
 
   :codox {:extra-deps {codox-theme-rdash/codox-theme-rdash {:mvn/version "0.1.2"}
@@ -18,7 +18,7 @@
          :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
                       io.github.cognitect-labs/test-runner
                       {:git/url "https://github.com/cognitect-labs/test-runner"
-                       :sha "7284cda41fb9edc0f3bc6b6185cfb7138fc8a023"}}
+                       :sha "3f288f1f16d167723ad87cc35b1dfee3c1681e10"}}
          :exec-fn cognitect.test-runner.api/test}
   :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
             :exec-fn hf.depstar/uberjar
@@ -26,15 +26,15 @@
                         :compile-ns [aoc-util.tools aoc-util.utils]
                         :jar "aoc-util.jar"
                         :sync-pom true}}}
- :deps {com.ensarsarajcic.neovim.java/unix-socket-connection {:mvn/version "0.4.6"}
+ :deps {com.ensarsarajcic.neovim.java/unix-socket-connection {:mvn/version "0.5.0"}
         com.rpl/specter {:mvn/version "1.1.4"}
-        hato/hato {:mvn/version "0.9.0"}
+        hato/hato {:mvn/version "1.0.0"}
         hickory/hickory {:mvn/version "0.7.1"}
         io.github.furstenheim/copy_down {:mvn/version "1.1"}
-        lambdaisland/regal {:mvn/version "0.0.143"}
-        org.clojure/clojure {:mvn/version "1.11.1"}
-        org.clojure/data.json {:mvn/version "2.4.0"}
-        org.clojure/data.priority-map {:mvn/version "1.1.0"}
+        lambdaisland/regal {:mvn/version "0.1.175"}
+        org.clojure/clojure {:mvn/version "1.12.0"}
+        org.clojure/data.json {:mvn/version "2.5.1"}
+        org.clojure/data.priority-map {:mvn/version "1.2.0"}
         org.clojure/test.check {:mvn/version "1.1.1"}
-        tick/tick {:mvn/version "0.5.0"}}
+        tick/tick {:mvn/version "1.0"}}
  :paths ["src" "resources"]}

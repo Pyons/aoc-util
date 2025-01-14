@@ -160,12 +160,12 @@
   (download-puzzle year day))
 
 (defn parse-input
-  "Like get! but for strings,
-  helps to use the examples from the puzzle-description"
-  ([s] (parse-input s identity))
-  ([s parser]
+  "Like get! but for strings, helps to use the examples from 
+  the puzzle-description"
+  ([s] (parse-input s (map identity)))
+  ([s xform]
    (with-open [rdr (BufferedReader. (StringReader. s))]
-     (mapv parser (line-seq rdr)))))
+     (into [] xform (line-seq rdr)))))
 
 (defn get!
   "defaults to current namespace default parser `identity`"
@@ -181,6 +181,21 @@
   ([year day parser] 
    (with-open [rdr (reader (download-puzzle year day))]
      (mapv parser (line-seq rdr)))))
+
+(defn get-xf! 
+  "Like get! but takes an xform, instead of a mapping function"
+  ([]
+   (let [[year day] (parse-ns *ns*)]
+     (get-xf! year day (map identity))))
+  ([xform]
+   (let [[year day] (parse-ns *ns*)]
+     (get-xf! year day xform)))
+  ([ns xform]
+   (let [[year day] (parse-ns ns)]
+     (get-xf! year day xform)))
+  ([year day xform] 
+   (with-open [rdr (reader (download-puzzle year day))]
+     (into [] xform (line-seq rdr)))))
 
 (defn -get
   ([^String ns]
